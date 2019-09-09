@@ -5,16 +5,16 @@ import time
 
 TF_CONFIG = tf.ConfigProto(allow_soft_placement = True)
 
-class Word2Vec(object):
+class SGNS(object):
     """
     Skip-Gram With Negative Sampling
     --------------------------------
     """
-    def __init__(self, embed_dim=100, window=10, min_count=3, min_len=3, max_len=200,
+    def __init__(self, embed_dim=100, window_size=10, min_count=3, min_len=3, max_len=200,
                  random_window=False, n_sampled=100, subsample=True, subsample_thr=1e-5,
                  lr=None, name=None, log_file=None):
         self._embed_dim = embed_dim
-        self._window = window
+        self._window_size = window_size
         self._min_count = min_count
         self._min_len = min_len
         self._max_len = max_len
@@ -78,7 +78,7 @@ class Word2Vec(object):
         targets = []
         for seq in sequences:
             for ix in range(len(seq)):
-                window_size = np.random.randint(1, self._window+1) if self._random_window else self._window
+                window_size = np.random.randint(1, self._window_size+1) if self._random_window else self._window_size
                 start = ix-window_size if (ix-window_size)>0 else 0
                 end = ix + window_size
                 target_words = seq[start:ix] + seq[ix+1:end+1]
@@ -96,9 +96,7 @@ class Word2Vec(object):
 
     def _save_word_vec(self, path,
                        field_separator="\t", vector_separator=" "):
-        embed_matrix = self._sess.run(self._embed_matrix)
-        embed_dict = {word:embed_matrix[ix].tolist()
-                      for word, ix in self._word2ix.items()}
+        embed_dict = self.get_embeddings()
         with open(path, "w") as f:
             for word, vec in embed_dict.items():
                 f.write(word+field_separator+vector_separator.join([str(v) for v in vec])+"\n")
@@ -174,6 +172,12 @@ class Word2Vec(object):
     def _train_on_pair(self):
         pass
 
+    def get_embeddings(self):
+        embed_matrix = self._sess.run(self._embed_matrix)
+        embed_dict = {word:embed_matrix[ix].tolist()
+                      for word, ix in self._word2ix.items()}
+        return embed_dict
+
     def train(self, data, data_type="seq", source_type="file", epochs=10, batch_size=128):
         if source_type == "file":
             if data_type == "seq":
@@ -182,3 +186,12 @@ class Word2Vec(object):
 
     def save(self, out_path, field_separator="\t", vector_separator=" "):
         self._save_word_vec(out_path, field_separator, vector_separator)
+
+
+
+class CBOW(object):
+    """CBOW
+    """
+    def __init__(self):
+        pass
+        
