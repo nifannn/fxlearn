@@ -1,2 +1,2 @@
-embedding_path = "embedding.txt"
-update_seconds = 60
+embedding_path = "embeddings.txt"
+update_seconds = 3600

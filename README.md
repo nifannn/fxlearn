@@ -1,2 +1,2 @@
 # naive_learn
-some naive practice about machine learning
+some practice about machine learning

@@ -53,3 +53,14 @@ def search_by_vector():
     except Exception as e:
         print('Server error', e)
         return 'Server error', 500
+
+@bp.route("/get_goods_id", methods=['POST'])
+def get_goods_id():
+    try:
+        json_data = request.get_json(force=True)
+        print("Receive Json data : ", json_data)
+        results = bp.faiss_index._ix2id[:json_data['n']]
+        return jsonify(results)
+    except Exception as e:
+        print('Server error', e)
+        return 'Server error', 500

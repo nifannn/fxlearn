@@ -104,3 +104,10 @@ venv.bak/
 .mypy_cache/
 
 .DS_Store
+
+# scala
+*.properties
+resources/
+target/
+*test/
+*.idea/

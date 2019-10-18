@@ -8,8 +8,13 @@ from . import util
 class DeepWalk(object):
 	"""
 	DeepWalk
+	-----------------------
+	Refer to the paper:
+	DeepWalk: Online Learning of Social Representations
+	Bryan Perozzi, Rami Al-Rfou and Steven Skiena
+	Knowledge Discovery and Data Mining (KDD), 2014
 	"""
-	def __init__(self, num_walks=80, walk_length=20, embed_dim=128, 
+	def __init__(self, num_walks=10, walk_length=80, embed_dim=128, 
 					   window_size=10, min_count=3, min_len=3, max_len=200,
 					   random_window=False, n_sampled=100, subsample=True, 
 					   subsample_thr=1e-5, lr=None, name=None, log_file=None):

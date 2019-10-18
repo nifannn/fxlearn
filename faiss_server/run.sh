@@ -1,1 +1,1 @@
-uwsgi --http :5000 --module app:app --processes 4 --stats 127.0.0.1:9191 --master
+uwsgi --http :5000 --module app:app --processes 1 --stats 127.0.0.1:9191 --master
