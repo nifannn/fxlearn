@@ -1,4 +1,4 @@
-package spark_learn.recommend
+package spark_learn.recommendation
 
 class UserCFModel {
 

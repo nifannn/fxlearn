@@ -1,5 +1,5 @@
 package spark_learn.recommendation
 
-object UserCF {
+object TitleI2I {
 
 }
