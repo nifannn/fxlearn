@@ -2,14 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ff19e253-b2ca-4240-8cc3-f61935e3f477" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../embed/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../embed/evaluate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCF.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCF.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCFModel.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCFModel.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/RankI2I.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/RankI2I.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/Swing.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/Swing.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCF.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCF.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCFModel.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCFModel.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -21,10 +17,19 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/client/MysqlClient.scala">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCFModel.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" selection-start-line="15" selection-end-line="15" />
+            <state relative-caret-position="45">
+              <caret line="3" column="10" selection-start-line="3" selection-start-column="10" selection-end-line="3" selection-end-column="10" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
               <folding>
                 <element signature="e#33#60#0" expanded="true" />
               </folding>
@@ -32,83 +37,44 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCFModel.scala">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="45">
-              <caret line="3" column="10" lean-forward="true" selection-start-line="3" selection-start-column="10" selection-end-line="3" selection-end-column="10" />
+            <state relative-caret-position="480">
+              <caret line="32" column="20" lean-forward="true" selection-start-line="32" selection-start-column="20" selection-end-line="32" selection-end-column="20" />
+              <folding>
+                <element signature="e#40#66#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/case_classes/Recommend.scala">
+        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Mysql2Hive.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" column="42" selection-start-line="4" selection-start-column="42" selection-end-line="4" selection-end-column="42" />
+            <state relative-caret-position="150">
+              <caret line="10" column="2" selection-start-line="10" selection-start-column="2" selection-end-line="10" selection-end-column="24" />
+              <folding>
+                <element signature="e#40#66#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/evaluation/RecSimilarity.scala">
+        <entry file="file://$PROJECT_DIR$/src/main/resources/config/hive2redis.properties">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" column="4" selection-start-line="5" selection-start-column="4" selection-end-line="5" selection-end-column="4" />
+            <state relative-caret-position="165">
+              <caret line="11" column="12" lean-forward="true" selection-start-line="11" selection-start-column="12" selection-end-line="11" selection-end-column="12" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCF.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" column="7" selection-start-line="4" selection-start-column="7" selection-end-line="4" selection-end-column="7" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/TitleI2I.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="2" column="7" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/RankI2I.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" column="7" selection-start-line="4" selection-start-column="7" selection-end-line="4" selection-end-column="7" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/Swing.scala">
+        <entry file="file://$PROJECT_DIR$/src/main/resources/hql/hive2redis.hql">
           <provider selected="true" editor-type-id="text-editor">
             <state>
-              <caret column="34" selection-start-column="34" selection-end-column="34" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCF.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="34" selection-start-column="34" selection-end-column="34" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCFModel.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="34" selection-start-column="34" selection-end-column="34" />
+              <caret column="48" selection-start-column="48" selection-end-column="48" />
             </state>
           </provider>
         </entry>
@@ -126,6 +92,7 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>Junit</find>
+      <find>spark</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -137,7 +104,6 @@
         <option value="$PROJECT_DIR$/src/main/resources/config.properties" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/App.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Mysql2Hive.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/recommend/ItemCF.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/recommend/RankI2I.scala" />
@@ -147,7 +113,6 @@
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/io/Reader.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/io/Writer.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/client/MysqlClient.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCF.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCFModel.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/RankI2I.scala" />
@@ -155,12 +120,16 @@
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCF.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCFModel.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/case_classes/Recommend.scala" />
+        <option value="$PROJECT_DIR$/src/main/resources/config/hive2redis.properties" />
+        <option value="$PROJECT_DIR$/src/main/resources/hql/hive2redis.hql" />
+        <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="20" />
-    <option name="y" value="50" />
+  <component name="ProjectFrameBounds" extendedState="1">
+    <option name="x" value="195" />
+    <option name="y" value="23" />
     <option name="width" value="1400" />
     <option name="height" value="775" />
   </component>
@@ -170,6 +139,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -194,6 +165,22 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="resources" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="spark_learn" type="b2602c69:ProjectViewProjectNode" />
+              <item name="spark_learn" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="resources" type="462c0819:PsiDirectoryNode" />
+              <item name="config" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="spark_learn" type="b2602c69:ProjectViewProjectNode" />
+              <item name="spark_learn" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="resources" type="462c0819:PsiDirectoryNode" />
+              <item name="hql" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="spark_learn" type="b2602c69:ProjectViewProjectNode" />
@@ -254,16 +241,6 @@
               <item name="scala" type="462c0819:PsiDirectoryNode" />
               <item name="spark_learn" type="462c0819:PsiDirectoryNode" />
               <item name="util" type="462c0819:PsiDirectoryNode" />
-              <item name="client" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="spark_learn" type="b2602c69:ProjectViewProjectNode" />
-              <item name="spark_learn" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
-              <item name="spark_learn" type="462c0819:PsiDirectoryNode" />
-              <item name="util" type="462c0819:PsiDirectoryNode" />
               <item name="data_pipeline" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -291,12 +268,10 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1571713765558" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1572857041212" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -324,9 +299,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="20" y="50" width="1400" height="775" extended-state="0" />
+    <frame x="195" y="23" width="1400" height="775" extended-state="1" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.27172312" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2790869" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -378,53 +354,9 @@
     <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommend/ItemCFModel.scala" />
     <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommend/RankI2I.scala" />
     <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommend/UserCFModel.scala" />
-    <entry file="file://$PROJECT_DIR$/src/main/resources/config.properties">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="7" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Reader.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" selection-start-line="2" selection-end-line="3" selection-end-column="37" />
-          <folding>
-            <element signature="e#40#67#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Writer.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="14" selection-start-line="14" selection-end-line="14" />
-          <folding>
-            <element signature="e#40#67#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="7" selection-start-line="5" selection-start-column="7" selection-end-line="5" selection-end-column="7" />
-          <folding>
-            <element signature="e#40#66#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Mysql2Hive.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="7" selection-start-line="7" selection-start-column="7" selection-end-line="7" selection-end-column="7" />
-          <folding>
-            <element signature="e#40#66#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/config.properties" />
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Reader.scala" />
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Writer.scala" />
     <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/io/Reader.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
@@ -439,30 +371,32 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" selection-start-line="12" selection-end-line="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/prop/mysql2hive.properties">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret selection-end-line="6" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/prop/mysql2hive.properties" />
     <entry file="file://$PROJECT_DIR$/src/test/scala/spark_learn/MySpec.scala">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/common_dataframes/recommend.scala">
-      <provider selected="true" editor-type-id="text-editor" />
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/common_dataframes/recommend.scala" />
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/client/MysqlClient.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
+          <folding>
+            <element signature="e#33#60#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/TitleI2I.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
           <caret line="2" column="7" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/RankI2I.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="7" selection-start-line="4" selection-start-column="7" selection-end-line="4" selection-end-column="7" />
         </state>
       </provider>
     </entry>
@@ -473,27 +407,34 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/hql/itemcf.hql">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCF.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="34" selection-start-column="34" selection-end-column="34" />
+        <state relative-caret-position="30">
+          <caret line="2" column="7" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/UserCFModel.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="34" selection-start-column="34" selection-end-column="34" />
+        <state relative-caret-position="30">
+          <caret line="2" column="6" selection-start-line="2" selection-start-column="6" selection-end-line="2" selection-end-column="6" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/client/MysqlClient.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCFModel.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" selection-start-line="15" selection-end-line="15" />
-          <folding>
-            <element signature="e#33#60#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="45">
+          <caret line="3" column="10" selection-start-line="3" selection-start-column="10" selection-end-line="3" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCF.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="7" selection-start-line="4" selection-start-column="7" selection-end-line="4" selection-end-column="7" />
         </state>
       </provider>
     </entry>
@@ -511,24 +452,47 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCF.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Mysql2Hive.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="7" selection-start-line="4" selection-start-column="7" selection-end-line="4" selection-end-column="7" />
+        <state relative-caret-position="150">
+          <caret line="10" column="2" selection-start-line="10" selection-start-column="2" selection-end-line="10" selection-end-column="24" />
+          <folding>
+            <element signature="e#40#66#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/RankI2I.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/resources/config/hive2redis.properties">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="7" selection-start-line="4" selection-start-column="7" selection-end-line="4" selection-end-column="7" />
+        <state relative-caret-position="165">
+          <caret line="11" column="12" lean-forward="true" selection-start-line="11" selection-start-column="12" selection-end-line="11" selection-end-column="12" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/recommendation/ItemCFModel.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/resources/hql/hive2redis.hql">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="10" lean-forward="true" selection-start-line="3" selection-start-column="10" selection-end-line="3" selection-end-column="10" />
+        <state>
+          <caret column="48" selection-start-column="48" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="32" column="20" lean-forward="true" selection-start-line="32" selection-start-column="20" selection-end-line="32" selection-end-column="20" />
+          <folding>
+            <element signature="e#40#66#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
+          <folding>
+            <element signature="e#33#60#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
