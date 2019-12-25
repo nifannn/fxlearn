@@ -31,7 +31,8 @@ class FaissIndex(object):
         vectors = np.atleast_2d(vectors)
         distances, result_idxes = self._search(vectors, k+1)
         results = {item_id:[{self._ix2id[ix]: float(distances[row, col])} 
-                   for col, ix in enumerate(result_idxes[row].tolist()) if ix != self._id2ix[item_id]] 
+                   for col, ix in enumerate(result_idxes[row].tolist()) 
+                   if ix != self._id2ix[item_id] and ix >= 0] 
                    for row, item_id in enumerate(ids)}
         return results
 
@@ -40,6 +41,7 @@ class FaissIndex(object):
         vectors = np.atleast_2d(vectors)
         distances, result_idxes = self._search(vectors, k)
         results = {row:[{self._ix2id[ix]: float(distances[row, col])} 
-                   for col, ix in enumerate(result_idxes[row].tolist())] 
+                   for col, ix in enumerate(result_idxes[row].tolist())
+                   if ix >= 0] 
                    for row in range(len(result_idxes))}
         return results

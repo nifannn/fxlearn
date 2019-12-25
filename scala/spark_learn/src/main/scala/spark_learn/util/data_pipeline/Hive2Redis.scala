@@ -2,12 +2,16 @@ package spark_learn.util.data_pipeline
 
 import java.io.InputStream
 import java.util.Properties
+import scala.io.Source
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.slf4j.{Logger, LoggerFactory}
+import scopt.OParser
 import spark_learn.util.client.RedisClient
+import spark_learn.Banner
 
 object Hive2Redis {
   val prop = new Properties()
-  val inputStream = this.getClass.getClassLoader.getResourceAsStream("config/hive2redis.properties")
+  val inputStream = this.getClass.getClassLoader.getResourceAsStream("redis_config.properties")
   prop.load(inputStream)
 
   private val redisHost = prop.getProperty("redis.host")
@@ -16,14 +20,64 @@ object Hive2Redis {
   private val redisTimeout = prop.getProperty("redis.timeout")
   private val redisExpireTime = prop.getProperty("redis.expire_time")
   private val redisTryTimes = prop.getProperty("redis.try_times")
-  private val dfKeyCol = prop.getProperty("key_col")
-  private val dfListCol = prop.getProperty("list_col")
-  private val redisPrefix = prop.getProperty("prefix")
 
-  val hqlStream = this.getClass.getClassLoader.getResourceAsStream("hql/hive2redis.hql")
-  private val hql = scala.io.Source.fromInputStream(hqlStream).mkString
+  val logger = LoggerFactory.getLogger(this.getClass)
+
+  case class Config(
+                   hqlFile: String = "",
+                   redisPrefix: String = "",
+                   keyCol: String = "",
+                   listCol: String = ""
+                   )
+
+  val builder = OParser.builder[Config]
+  val parser = {
+    import builder._
+    OParser.sequence(
+      programName("spark-submit --class spark_learn.util.data_pipeline.Hive2Redis "),
+      head("spark_learn", "1.0"),
+      opt[String]('f', "hql")
+        .required()
+        .valueName("<hql_file>")
+        .action((x, c) => c.copy(hqlFile = x))
+        .text("hql file"),
+      opt[String]('p', "prefix")
+        .required()
+        .action((x, c) => c.copy(redisPrefix = x))
+        .text("redis prefix"),
+      opt[String]('k', "key")
+        .required()
+        .action((x, c) => c.copy(keyCol = x))
+        .text("dataframe column used as key"),
+      opt[String]('l', "list")
+        .required()
+        .action((x, c) => c.copy(listCol = x))
+        .text("dataframe column used as list")
+    )
+  }
 
   def main(args: Array[String]): Unit = {
+    logger.info(Banner.sparkLearn)
+    val config = OParser.parse(parser, args, Config()) match {
+      case Some(config) => {
+        logger.info("hql file : "+config.hqlFile)
+        logger.info("prefix : "+config.redisPrefix)
+        logger.info("key column : "+config.keyCol)
+        logger.info("list column : "+config.listCol)
+        config
+      }
+      case _ => {
+        logger.warn("inappropriate parameters, exit")
+        sys.exit(1)
+      }
+    }
+
+    val bufferedSource = Source.fromFile(config.hqlFile)
+    val hql = bufferedSource.getLines.mkString
+    bufferedSource.close
+
+    logger.info("hql : "+hql)
+
     val spark = SparkSession.
       builder()
       .appName(s"${this.getClass.getSimpleName}")
@@ -42,6 +96,8 @@ object Hive2Redis {
     redisConf.setProperty("expire_time", redisExpireTime)
     redisConf.setProperty("try_times", redisTryTimes)
 
-    RedisClient.writeList(redisConf, df, dfKeyCol, dfListCol, redisPrefix)
+    logger.info("redis host : "+redisHost)
+
+    RedisClient.writeList(redisConf, df, config.keyCol, config.listCol, config.redisPrefix)
   }
 }

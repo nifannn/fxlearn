@@ -1,5 +1,19 @@
 import numpy as np
 
+def load_embedding(fp, field_delimiter="\t", element_delimiter=" ", line_delimiter="\n", id_func=None):
+	item_embedding = dict()
+	with open(fp, "r") as f:
+		for line in f:
+			try:
+				item_id, embed = line.strip(line_delimiter).split(field_delimiter)
+				if id_func is not None:
+					item_id = id_func(item_id)
+				embed = embed.split(element_delimiter)
+				embed = [float(v) for v in embed]
+				item_embedding[item_id] = embed
+			except:
+				continue
+	return item_embedding
 
 def partition_num(total, n):
 	if total % n == 0:

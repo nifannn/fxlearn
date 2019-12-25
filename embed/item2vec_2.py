@@ -5,6 +5,7 @@ import sys
 import time
 import os
 import json
+import tempfile
 
 sys.path.append("../")
 import util
@@ -21,7 +22,7 @@ class SGNS(object):
 
     def __init__(self, embed_dim=128, window_size=10, random_window=False, distinct_targets=False,
                  item_min_count=3, item_max_count=None, item_filter_method="replace",
-                 item_replace_value="<zero>", train_with_replace_value=True,
+                 item_replace_value="<UNK>", train_with_replace_value=True,
                  seq_min_len=3, seq_max_len=200, seq_truncate_method='left',
                  n_sampled=10, ns_method="sampled_softmax", ns_remove_accidental_hits=True,
                  subsample=True, subsample_thr=1e-5,
@@ -42,7 +43,6 @@ class SGNS(object):
         self._n_sampled = n_sampled
         self._ns_method = ns_method
         self._ns_remove_accidental_hits = ns_remove_accidental_hits
-        self._ns_sampled_values = None
         self._subsample = subsample
         self._subsample_thr = subsample_thr
         self._lr = lr
@@ -62,13 +62,11 @@ class SGNS(object):
             loss = tf.nn.sampled_softmax_loss(self._softmax_w, softmax_b,
                                               self._labels, self._embed,
                                               self._n_sampled, len(self._ix2item),
-                                              sampled_values=self._ns_sampled_values,
                                               remove_accidental_hits=self._ns_remove_accidental_hits)
         if self._ns_method == "nce":
             loss = tf.nn.nce_loss(self._softmax_w, softmax_b, 
                                   self._labels, self._embed,
                                   self._n_sampled, len(self._ix2item),
-                                  sampled_values=self._ns_sampled_values,
                                   remove_accidental_hits=self._ns_remove_accidental_hits)
         self._loss = tf.reduce_mean(loss)
 
@@ -86,23 +84,54 @@ class SGNS(object):
         if not os.path.isdir(folder):
             os.mkdir(folder)
 
+    def _count_item(self, feed, feed_type, delimiter=","):
+        if feed_type == "list":
+            return self._count_item_from_list(feed)
+        if feed_type == "file":
+            return self._count_item_from_file(feed, delimiter)
+
     @staticmethod
-    def _count_item(sequences):
+    def _count_item_from_list(sequences):
         item_count = dict()
         for seq in sequences:
             for item in seq:
                 item_count[item] = item_count.get(item, 0)+1
         return item_count
 
-    def _count_item_from_file(self, filepath):
+    @staticmethod
+    def _count_item_from_file(filepath, delimiter=","):
         item_count = dict()
-        file_len = self._get_file_len(filepath)
-        generator = self._generate_list_from_file(filepath)
-        for _ in range(file_len):
-            seq = self._truncate_seq(next(generator))
-            for item in seq:
-                item_count[item] = item_count.get(item, 0)+1
+        with open(filepath, "r") as f:
+            for line in f:
+                seq = line.strip("\n").split(delimiter)
+                for item in seq:
+                    item_count[item] = item_count.get(item, 0)+1
         return item_count
+
+    def _count_seq(self, feed, feed_type, delimiter=","):
+        if feed_type = "list":
+            return self._count_seq_from_list(feed)
+        if feed_type = "file":
+            return self._count_seq_from_file(feed, delimiter)
+
+    @staticmethod
+    def _count_seq_from_list(feed):
+        n_seq = len(feed)
+        avg_seq_len = np.mean([len(seq) for seq in feed])
+        return n_seq, avg_seq_len
+
+    @staticmethod
+    def _count_seq_from_file(feed, delimiter=","):
+        n_seq = 0
+        total_len = 0
+        with open(feed, "r") as f:
+            for line in f:
+                n_seq += 1
+                total_len += len(line.strip("\n").split(delimiter))
+        if not n_seq:
+            return 0, 0
+        avg_seq_len = total_len / n_seq
+        return n_seq, avg_seq_len
 
     @staticmethod
     def _generate_list_from_file(filepath, delimiter=","):
@@ -181,7 +210,6 @@ class SGNS(object):
             "n_sampled": self._n_sampled,
             "ns_method": self._ns_method,
             "ns_remove_accidental_hits": self._ns_remove_accidental_hits,
-            "ns_sampled_values": self._ns_sampled_values,
             "subsample": self._subsample,
             "subsample_thr": self._subsample_thr,
             "lr": self._lr,
@@ -195,6 +223,33 @@ class SGNS(object):
         freq = {item:cnt/total_cnt for item, cnt in item_count.items()}
         p_drop = {item:1-np.sqrt(self._subsample_thr/fr) for item, fr in freq.items()}
         return p_drop
+
+    def _make_ix_sequences(self, feed, feed_type, delimiter=","):
+        if feed_type == "list":
+            return self._make_ix_sequences_from_list(feed)
+        if feed_type == "file":
+            res = self._make_ix_sequences_from_file(feed, delimiter)
+            os.remove(feed)
+            return res
+
+    def _make_ix_seq(self, seq):
+        if self._item_filter_method == "replace":
+            return [self._item2ix[item] if item in self._item2ix else 0 for item in seq]
+        return [self._item2ix[item] for item in seq if item in self._item2ix]
+
+    def _make_ix_sequences_from_list(self, sequences):
+        return [self._make_ix_seq(seq) for seq in sequences]
+
+    def _make_ix_sequences_from_file(self, filepath, delimiter=","):
+        tmp_file = tempfile.mkstemp(prefix="tmp_w2v_",text=True)[1]
+        with open(tmp_file, "w") as o:
+            with open(filepath, "r") as f:
+                for line in f:
+                    seq = line.strip("\n").split(delimiter)
+                    ix_seq = self._make_ix_seq(seq)
+                    if ix_seq:
+                        o.write(delimiter.join([str(i) for i in ix_seq])+"\n")
+        return tmp_file
 
     @classmethod
     def _new_name(cls):
@@ -221,7 +276,24 @@ class SGNS(object):
         return [[ix for ix in seq if random.random() < 1-p_drop[self._ix2item[ix]]]
                  for seq in sequences]
 
-    def _truncate_sequences(self, sequences):
+    def _truncate_sequences(self, feed, feed_type, delimiter=","):
+        if feed_type == "list":
+            return self._truncate_sequences_from_list(feed)
+        if feed_type == "file":
+            return self._truncate_sequences_from_file(feed, delimiter)
+
+    def _truncate_sequences_from_file(self, feed, delimiter=","):
+        tmp_file = tempfile.mkstemp(prefix="tmp_w2v_",text=True)[1]
+        with open(tmp_file, "w") as o:
+            with open(feed, "r") as f:
+                for line in f:
+                    seq = line.strip("\n").split(delimiter)
+                    truncated_seq = self._truncate_seq(seq)
+                    if truncated_seq:
+                        o.write(",".join(truncated_seq)+"\n")
+        return tmp_file
+
+    def _truncate_sequences_from_list(self, sequences):
         res = []
         for seq in sequences:
             truncated_seq = self._truncate_seq(seq)
@@ -239,6 +311,25 @@ class SGNS(object):
                 if self._seq_truncate_method == 'right':
                     return seq[:self._seq_max_len]
         return seq
+
+    def _train(self, feed, feed_type, epochs=10, batch_size=128,
+              shuffle=True, verbose=False, item_pools=None, delimiter=","):
+        self._logger.info("preprocessing data ...")
+        if verbose:
+            self._logger.info("truncating sequences ...")
+        res = self._truncate_sequences(feed, feed_type, delimiter)
+        if verbose:
+            n_seq, avg_seq_len = self._count_seq(res, feed_type, delimiter)
+            self._logger.info("{} sequences, average length: {}".format(n_seq, avg_seq_len))
+            self._logger.info("filtering items ...")
+        item_count = self._count_item(res, feed_type, delimiter)
+        item_count = self._set_item_pools(item_count, True, item_pools=item_pools)
+        if verbose:
+            self._logger.info("{} items for training ".format(len(item_count)))
+        res = self._make_ix_sequences(res, feed_type, delimiter)
+        if self._subsample:
+            res = self._subsampling(res, item_count, feed_type, delimiter)
+        self._logger.info("generating training samples ...")
 
     def _train_list(self, feed, epochs=10, batch_size=128,
                     shuffle=True, verbose=False, item_pools=None):
@@ -267,7 +358,9 @@ class SGNS(object):
 
     def _train_file(self, feed, epochs=10, batch_size=128,
                     shuffle=True, verbose=False, item_pools=None):
-        self._logger.info("preparing ...")
+        self._logger.info("preprocessing data ...")
+        if verbose:
+            self._logger.info()
         item_count = self._count_item_from_file(feed)
         if verbose:
             self._logger.info("{} items in file after truncating sequences".format(len(item_count)))
@@ -393,12 +486,13 @@ class SGNS(object):
         self._logger = util.logger.Logger(log_file, self._name)
 
     def _set_item_pools(self, item_count, return_new_count=False, item_pools=None):
+        self._ix2item = list(item_count.keys())
         if isinstance(self._item_max_count, int) or isinstance(self._item_max_count, float):
-            self._ix2item = [item for item, cnt in item_count.items() if cnt >= self._item_min_count and cnt <= self._item_max_count]
-        else:
-            self._ix2item = [item for item, cnt in item_count.items() if cnt >= self._item_min_count]
+            self._ix2item = [item for item in self._ix2item if item_count[item] <= self._item_max_count]
+        if isinstance(self._item_min_count, int) or isinstance(self._item_min_count, float):
+            self._ix2item = [item for item in self._ix2item if item_count[item] >= self._item_min_count]
         if item_pools:
-            self._ix2item = item_pools
+            self._ix2item = [item for item in self._ix2item if item in item_pools]
         new_count = {item:item_count[item] for item in self._ix2item if item in item_count}
         if self._item_filter_method == "replace":
             self._ix2item = [self._item_replace_value] + self._ix2item
@@ -435,16 +529,9 @@ class SGNS(object):
         self._logger.info("Saved in {} successfully.".format(folder))
 
     def train(self, feed, feed_type="list", epochs=10, batch_size=128,
-              shuffle=True, verbose=False, item_pools=None, ns_sampled_values=None):
-        if ns_sampled_values is not None:
-              self._ns_sampled_values = ns_sampled_values
-
-        if feed_type == "list":
-            self._train_list(feed=feed, epochs=epochs, batch_size=batch_size,
-                             shuffle=shuffle, verbose=verbose, item_pools=item_pools)
-        if feed_type == "file":
-            self._train_file(feed=feed, epochs=epochs, batch_size=batch_size,
-                             shuffle=shuffle, verbose=verbose, item_pools=item_pools)
+              shuffle=True, verbose=False, item_pools=None, delimiter=","):
+        self._train(feed=feed, feed_type=feed_type, epochs=epochs, batch_size=batch_size,
+                    shuffle=shuffle, verbose=verbose, item_pools=item_pools, delimiter=delimiter)
         return self
 
         

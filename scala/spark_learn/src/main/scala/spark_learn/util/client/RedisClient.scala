@@ -29,7 +29,7 @@ object RedisClient {
 
     while (tryTimes > 0 && !flag){
       try {
-        df.foreachPartition(partition => {
+        df.repartition(500).foreachPartition(partition => {
           val rc = new Jedis(host, port, timeout)
           rc.auth(password)
           val pipe = rc.pipelined
@@ -40,8 +40,8 @@ object RedisClient {
             pipe.del(Array(key):_*)
             pipe.rpush(key, list.map(_.toString):_*)
             pipe.expire(key, expireTime)
+            pipe.sync()
           })
-          pipe.sync()
         })
         flag = true
       } catch {
