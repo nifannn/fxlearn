@@ -1,5 +1,6 @@
 import faiss
 import numpy as np
+from faiss import normalize_L2
 
 
 class FaissIndex(object):
@@ -17,7 +18,9 @@ class FaissIndex(object):
         for ix, item_id in enumerate(self._ix2id):
             matrix[ix] = self._id2vec[item_id]
         matrix = matrix.astype('float32')
+        normalize_L2(matrix)
         self._index = faiss.IndexFlatL2(len(self._id2vec[self._ix2id[0]]))
+        self._index.train(matrix)
         self._index.add(matrix)
 
     def _search(self, vectors, k):
@@ -29,6 +32,7 @@ class FaissIndex(object):
         vectors = [self._id2vec[item_id] for item_id in ids]
         vectors = np.array(vectors, dtype='float32')
         vectors = np.atleast_2d(vectors)
+        normalize_L2(vectors)
         distances, result_idxes = self._search(vectors, k+1)
         results = {item_id:[{self._ix2id[ix]: float(distances[row, col])} 
                    for col, ix in enumerate(result_idxes[row].tolist()) 
@@ -39,6 +43,7 @@ class FaissIndex(object):
     def search_by_vectors(self, vectors, k):
         vectors = np.array(vectors, dtype='float32')
         vectors = np.atleast_2d(vectors)
+        normalize_L2(vectors)
         distances, result_idxes = self._search(vectors, k)
         results = {row:[{self._ix2id[ix]: float(distances[row, col])} 
                    for col, ix in enumerate(result_idxes[row].tolist())

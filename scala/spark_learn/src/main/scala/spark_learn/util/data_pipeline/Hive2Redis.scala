@@ -21,7 +21,7 @@ object Hive2Redis {
   private val redisExpireTime = prop.getProperty("redis.expire_time")
   private val redisTryTimes = prop.getProperty("redis.try_times")
 
-  val logger = LoggerFactory.getLogger(this.getClass)
+  val logger = LoggerFactory.getLogger(getClass.getName)
 
   case class Config(
                    hqlFile: String = "",
