@@ -9,7 +9,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession, Row, SaveMode}
 import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId, Edge}
 import org.apache.spark.SparkContext
 import spark_learn.embed.graph.{NodeAttr, EdgeAttr, createDirectedEdge, createUndirectedEdge}
-import spark_learn.sample.AliasMethod
+import spark_learn.sample.AliasSample
 
 
 object Node2vecModel extends Serializable {
@@ -91,15 +91,15 @@ object Node2vecModel extends Serializable {
 
     graph = graph.mapVertices[NodeAttr] { case (vertexId, nodeAttrs) =>
         if (nodeAttrs.neighbors.length > 0){
-          val (accept, alias) = AliasMethod.createAliasTable(nodeAttrs.neighbors.map(_._2))
-          val nextNodeIdx = AliasMethod.sample(accept, alias)
+          val (accept, alias) = AliasSample.createAliasTable(nodeAttrs.neighbors.map(_._2))
+          val nextNodeIdx = AliasSample.sample(accept, alias)
           nodeAttrs.path = Array(vertexId, nodeAttrs.neighbors(nextNodeIdx)._1)
         }
         nodeAttrs
     }.mapTriplets { edgeTriplet: EdgeTriplet[NodeAttr, EdgeAttr] =>
       if (edgeTriplet.dstAttr.neighbors.length > 0){
         val edgeProbs = getEdgeProbs(P.value, Q.value)(edgeTriplet)
-        val (accept, alias) = AliasMethod.createAliasTable(edgeProbs)
+        val (accept, alias) = AliasSample.createAliasTable(edgeProbs)
         edgeTriplet.attr.accept = accept
         edgeTriplet.attr.alias = alias
         edgeTriplet.attr.dstNeighbors = edgeTriplet.dstAttr.neighbors.map(_._1)
@@ -134,7 +134,7 @@ object Node2vecModel extends Serializable {
           (s"${prevNodeId}_${currentNodeId}", (srcNodeId, pathBuffer))
         }.join(edge2attr).map { case (edge, ((srcNodeId, pathBufffer), attr)) =>
             if (attr.dstNeighbors.length>0) {
-              val nextNodeIndex = AliasMethod.sample(attr.accept, attr.alias)
+              val nextNodeIndex = AliasSample.sample(attr.accept, attr.alias)
               val nextNodeId = attr.dstNeighbors(nextNodeIndex)
               pathBufffer.append(nextNodeId)
             }
@@ -175,9 +175,10 @@ object Node2vecModel extends Serializable {
   def getId2Node = this.node2id.map{ case (node, index) => (index, node) }
 
   def getRandomPaths = {
-    val id2nodeMap = getId2Node.collectAsMap
     randomWalkPaths.map { case (srcNodeId, pathBuffer) =>
-        pathBuffer.map(id2nodeMap(_)).toArray
+        val indexedPath = pathBuffer.zipWithIndex.toArray
+        sc.parallelize(indexedPath).join(getId2Node).map { case (nodeId, (pathIdx, nodeName)) =>
+          (nodeName, pathIdx) }.collect.sortBy(_._2).map(_._1)
     }
   }
 

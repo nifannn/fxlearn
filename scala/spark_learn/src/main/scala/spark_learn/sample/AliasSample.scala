@@ -2,7 +2,7 @@ package spark_learn.sample
 
 import scala.collection.mutable.ArrayBuffer
 
-object AliasMethod {
+object AliasSample {
   def createAliasTable(probs: Array[Double]) : (Array[Double], Array[Int]) = {
     val N = probs.length
     val accept = Array.fill(N)(0.0)
