@@ -25,9 +25,7 @@ object Hive2Redis {
 
   case class Config(
                    hqlFile: String = "",
-                   redisPrefix: String = "",
-                   keyCol: String = "",
-                   listCol: String = ""
+                   redisPrefix: String = ""
                    )
 
   val builder = OParser.builder[Config]
@@ -44,15 +42,7 @@ object Hive2Redis {
       opt[String]('p', "prefix")
         .required()
         .action((x, c) => c.copy(redisPrefix = x))
-        .text("redis prefix"),
-      opt[String]('k', "key")
-        .required()
-        .action((x, c) => c.copy(keyCol = x))
-        .text("dataframe column used as key"),
-      opt[String]('l', "list")
-        .required()
-        .action((x, c) => c.copy(listCol = x))
-        .text("dataframe column used as list")
+        .text("redis prefix")
     )
   }
 
@@ -62,8 +52,6 @@ object Hive2Redis {
       case Some(config) => {
         logger.info("hql file : "+config.hqlFile)
         logger.info("prefix : "+config.redisPrefix)
-        logger.info("key column : "+config.keyCol)
-        logger.info("list column : "+config.listCol)
         config
       }
       case _ => {
@@ -98,6 +86,6 @@ object Hive2Redis {
 
     logger.info("redis host : "+redisHost)
 
-    RedisClient.writeList(redisConf, df, config.keyCol, config.listCol, config.redisPrefix)
+    RedisClient.writeList(redisConf, df, config.redisPrefix)
   }
 }

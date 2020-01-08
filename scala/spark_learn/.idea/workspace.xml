@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ff19e253-b2ca-4240-8cc3-f61935e3f477" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/embed/Node2vecModel.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/embed/Node2vecModel.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/sample/AliasMethod.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,11 +14,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="566">
-              <caret line="43" column="12" selection-start-line="43" selection-start-column="12" selection-end-line="43" selection-end-column="12" />
+            <state relative-caret-position="225">
+              <caret line="15" column="13" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
               <folding>
                 <element signature="e#33#60#0" expanded="true" />
               </folding>
@@ -29,7 +29,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/embed/Node2vec.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1305">
+            <state relative-caret-position="929">
               <caret line="87" column="29" lean-forward="true" selection-start-line="87" selection-start-column="29" selection-end-line="87" selection-end-column="29" />
               <folding>
                 <element signature="e#27#67#0" expanded="true" />
@@ -38,11 +38,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="194">
-              <caret line="65" column="29" lean-forward="true" selection-start-line="65" selection-start-column="29" selection-end-line="65" selection-end-column="29" />
+            <state relative-caret-position="196">
+              <caret line="53" column="51" lean-forward="true" selection-start-line="53" selection-start-column="8" selection-end-line="53" selection-end-column="51" />
               <folding>
                 <element signature="e#40#66#0" expanded="true" />
               </folding>
@@ -146,7 +146,6 @@
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/case_classes/Recommend.scala" />
         <option value="$PROJECT_DIR$/src/main/resources/config/hive2redis.properties" />
         <option value="$PROJECT_DIR$/src/main/resources/hql/hive2redis.hql" />
-        <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala" />
         <option value="$PROJECT_DIR$/src/main/resources/config/log4j.properties" />
         <option value="$PROJECT_DIR$/src/main/resources/redis_config.properties" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/Banner.scala" />
@@ -155,14 +154,15 @@
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/sample/AliasMethod.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/embed/graph/package.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/embed/Node2vec.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/sample/AliasSample.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/spark_learn/embed/Node2vecModel.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
+  <component name="ProjectFrameBounds" extendedState="1">
     <option name="x" value="40" />
     <option name="y" value="23" />
     <option name="width" value="1400" />
@@ -262,7 +262,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1578470252840" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1578483869904" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -295,10 +295,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1440" height="900" extended-state="6" />
+    <frame x="40" y="23" width="1400" height="775" extended-state="1" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28683835" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2952872" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -548,16 +548,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/embed/Node2vec.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1305">
-          <caret line="87" column="29" lean-forward="true" selection-start-line="87" selection-start-column="29" selection-end-line="87" selection-end-column="29" />
-          <folding>
-            <element signature="e#27#67#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/embed/Node2vecModel.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="283">
@@ -575,22 +565,32 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="566">
-          <caret line="43" column="12" selection-start-line="43" selection-start-column="12" selection-end-line="43" selection-end-column="12" />
+        <state relative-caret-position="196">
+          <caret line="53" column="51" lean-forward="true" selection-start-line="53" selection-start-column="8" selection-end-line="53" selection-end-column="51" />
           <folding>
-            <element signature="e#33#60#0" expanded="true" />
+            <element signature="e#40#66#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/data_pipeline/Hive2Redis.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/embed/Node2vec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="194">
-          <caret line="65" column="29" lean-forward="true" selection-start-line="65" selection-start-column="29" selection-end-line="65" selection-end-column="29" />
+        <state relative-caret-position="929">
+          <caret line="87" column="29" lean-forward="true" selection-start-line="87" selection-start-column="29" selection-end-line="87" selection-end-column="29" />
           <folding>
-            <element signature="e#40#66#0" expanded="true" />
+            <element signature="e#27#67#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/spark_learn/util/client/RedisClient.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" column="13" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
+          <folding>
+            <element signature="e#33#60#0" expanded="true" />
           </folding>
         </state>
       </provider>

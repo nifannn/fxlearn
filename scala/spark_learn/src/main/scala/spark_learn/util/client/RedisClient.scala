@@ -17,8 +17,7 @@ object RedisClient {
 
   }
 
-  def writeList(redisConf: Properties, df: DataFrame,
-                keyCol: String, listCol: String, prefix: String ): Unit = {
+  def writeList(redisConf: Properties, df: DataFrame, prefix: String ): Unit = {
     val host = redisConf.getProperty("host")
     val port = redisConf.getProperty("port").toInt
     val password = redisConf.getProperty("password")
@@ -35,10 +34,10 @@ object RedisClient {
           val pipe = rc.pipelined
 
           partition.foreach(row => {
-            val key = prefix + row.getAs[Long](keyCol)
-            val list = row.getAs[Seq[Long]](listCol)
+            val key = prefix + row.get(0)
+            val list = row.getList(1).toArray.map(_.toString)
             pipe.del(Array(key):_*)
-            pipe.rpush(key, list.map(_.toString):_*)
+            pipe.rpush(key, list:_*)
             pipe.expire(key, expireTime)
             pipe.sync()
           })
