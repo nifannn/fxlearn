@@ -176,10 +176,13 @@ object Node2vecModel extends Serializable {
 
   def getRandomPaths = {
     randomWalkPaths.map { case (srcNodeId, pathBuffer) =>
-        val indexedPath = pathBuffer.zipWithIndex.toArray
-        sc.parallelize(indexedPath).join(getId2Node).map { case (nodeId, (pathIdx, nodeName)) =>
-          (nodeName, pathIdx) }.collect.sortBy(_._2).map(_._1)
-    }
+      pathBuffer.toArray }.zipWithIndex.flatMap { case (walkPath, pathId) =>
+      walkPath.zipWithIndex.map { case (nodeId, posId) =>
+        (nodeId, (posId, pathId))
+      }
+    }.join(getId2Node).map { case (nodeId, ((posId, pathId), nodeName)) =>
+      (pathId, Array((nodeName, posId)))
+    }.reduceByKey(_++_).map(_._2.sortBy(_._2).map(_._1))
   }
 
   def saveRandomPathAsTextFile(path: String, sep: String = " "): this.type = {
@@ -187,7 +190,7 @@ object Node2vecModel extends Serializable {
     this
   }
 
-  def saveRandomPathAsHiveTable(tblName: String, column: String, sep: String = " "): this.type = {
+  def saveRandomPathAsHiveTable(tblName: String, column: String = "sequence", sep: String = " "): this.type = {
     val dupSpark = spark
     import dupSpark.implicits._
     getRandomPaths.map(_.mkString(sep)).toDF(column).write.mode(SaveMode.Overwrite).saveAsTable(tblName)

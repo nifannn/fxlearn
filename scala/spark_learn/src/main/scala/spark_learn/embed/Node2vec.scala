@@ -12,7 +12,7 @@ object Node2vec {
   case class Config(
                    hqlFile: String = "",
                    writeTable: String = "",
-                   column: String = "",
+                   column: String = "sequence",
                    degree: Int = 30,
                    p: Double = 1.0,
                    q: Double = 1.0,
@@ -37,7 +37,6 @@ object Node2vec {
         .action((x, c) => c.copy(writeTable = x))
         .text("output hive table"),
       opt[String]('c', "column")
-        .required()
         .action((x, c) => c.copy(column = x))
         .text("output hive table column"),
       opt[Int]('d', "degree")
