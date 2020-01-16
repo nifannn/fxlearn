@@ -1,2 +1,2 @@
-# naive_learn
+# fxlearn
 some practice about machine learning
