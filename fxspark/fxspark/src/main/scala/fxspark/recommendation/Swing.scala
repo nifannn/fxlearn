@@ -61,12 +61,6 @@ object Swing {
       opt[String]("score-col")
         .action((x, c) => c.copy(scoreCol = x))
         .text("item similarity score column of item similarity hive table"),
-      opt[String]("item-col")
-        .action((x, c) => c.copy(itemCol = x))
-        .text("item column of topn result hive table"),
-      opt[String]("itemlist-col")
-        .action((x, c) => c.copy(itemListCol = x))
-        .text("recommended item list column of topn result hive table"),
       opt[String]("partition-col")
         .action((x, c) => c.copy(partitionCol = x))
         .text("partition column name"),
@@ -91,7 +85,13 @@ object Swing {
             .text("number of items to recommend"),
           opt[String]("save-score")
             .action((x, c) => c.copy(saveScore = x))
-            .text("path to save item similarity, which will not be saved if not set ")
+            .text("path to save item similarity, which will not be saved if not set "),
+          opt[String]("item-col")
+            .action((x, c) => c.copy(itemCol = x))
+            .text("item column of topn result hive table"),
+          opt[String]("itemlist-col")
+            .action((x, c) => c.copy(itemListCol = x))
+            .text("recommended item list column of topn result hive table")
         )
     )
   }

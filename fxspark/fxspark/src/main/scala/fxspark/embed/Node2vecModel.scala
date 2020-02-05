@@ -1,14 +1,13 @@
-package spark_learn.embed
+package fxspark.embed
 
 import java.io.Serializable
-import scala.util.Try
 import scala.collection.mutable.ArrayBuffer
 import org.slf4j.{Logger, LoggerFactory}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, SparkSession, Row, SaveMode}
-import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId, Edge}
-import org.apache.spark.SparkContext
-import fxspark.embed.graph.{NodeAttr, EdgeAttr, createDirectedEdge, createUndirectedEdge}
+import org.apache.spark.sql.{DataFrame, SparkSession, Row}
+import org.apache.spark.sql.functions.lit
+import org.apache.spark.ml.feature.{Word2Vec, Word2VecModel}
+import org.apache.spark.ml.linalg.DenseVector
 import fxspark.sample.AliasSample
 
 
@@ -20,130 +19,171 @@ object Node2vecModel extends Serializable {
                     q: Double = 1.0,
                     numWalks: Int = 10,
                     walkLength: Int = 80,
-                    numPartition: Int = 200)
+                    directed: Boolean = true,
+                    weighted: Boolean = true,
+                    embedDim: Int = 32,
+                    maxIter: Int = 3,
+                    minCount: Int = 5,
+                    windowSize: Int = 5,
+                    stepSize: Double = 0.025)
 
-  var sc: SparkContext = null
-  var spark: SparkSession = null
   var params: Params = null
-  var node2id: RDD[(String, Long)] = null
-  var indexedEdges: RDD[Edge[EdgeAttr]] = _
-  var indexedNodes: RDD[(VertexId, NodeAttr)] = _
-  var graph: Graph[NodeAttr, EdgeAttr] = _
-  var randomWalkPaths: RDD[(Long, ArrayBuffer[Long])] = null
+  var edges: RDD[(String, String, Double)] = null
+  var nodeProbs: RDD[(String, Array[String], Array[Double], Array[Int])] = null
+  var edgeProbs: RDD[(String, Array[String], Array[Double], Array[Int])] = null
+  var randomWalkPaths: RDD[ArrayBuffer[String]] = null
+  var embeddings: DataFrame = null
 
-  def setup(spark: SparkSession, params: Params) : this.type = {
-    this.spark = spark
-    this.sc = spark.sparkContext
-    this.params = params
+  def setParams(degree: Int = 30, p: Double = 1.0, q: Double = 1.0, numWalks: Int = 10, walkLength: Int = 80,
+                directed: Boolean = true, weighted: Boolean = true, embedDim: Int = 32, maxIter: Int = 3,
+                minCount: Int = 5, windowSize: Int = 5, stepSize: Double = 0.025) : this.type = {
+    params = Params(degree = degree, p = p, q = q, numWalks = numWalks, walkLength = walkLength,
+      directed = directed, weighted = weighted, embedDim = embedDim, maxIter = maxIter, minCount = minCount,
+      windowSize = windowSize, stepSize = stepSize)
     this
   }
 
-  def buildGraph(df: DataFrame) : this.type = {
-    val maxDegree = sc.broadcast(params.degree)
-    val rawTriplets = df.rdd.map{ case Row(srcNode: String, dstNode: String, weight: Double) => (srcNode, dstNode, weight)}
-    val indexedTriplets = indexingTriplets(rawTriplets)
-    val nodeNeighbors = indexedTriplets.flatMap { case (srcId, dstId, weight) =>
-      createDirectedEdge.apply(srcId, dstId, weight)
-    }.reduceByKey(_++_).map{ case (nodeId, neighbors: Array[(Long,Double)]) =>
-      var neighbors_ = neighbors
-      if (neighbors_.length > maxDegree.value) {
-        neighbors_ = neighbors.sortWith{ case (left, right) => left._2 > right._2 }.slice(0, maxDegree.value)
+  def buildGraph(spark: SparkSession, df: DataFrame) : this.type = {
+    val maxDegree = spark.sparkContext.broadcast(params.degree)
+    val weightedEdges = params.weighted match {
+      case true => df.rdd.map(row => (row.getString(0), row.getString(1), row.getDouble(2)))
+      case false => df.rdd.map(row => (row.getString(0), row.getString(1), 1.0))
+    }
+    val rawEdges = params.directed match {
+      case true => weightedEdges.distinct()
+      case false => weightedEdges.map(x => (x._2, x._1, x._3)).union(weightedEdges).distinct()
+    }
+    edges = rawEdges.map { case (srcNode, dstNode, weight) =>
+      (srcNode, (dstNode, weight))
+    }.groupByKey().flatMap { case (srcNode, dstIter) =>
+      val dstArray = if (dstIter.size > maxDegree.value) {
+        dstIter.toArray.sortWith{ case (left, right) => left._2 > right._2 }.slice(0, maxDegree.value)
+      } else {
+        dstIter.toArray
       }
-      (nodeId, neighbors_)}
-    indexedNodes = getId2Node.leftOuterJoin(nodeNeighbors).map {
-      case (nodeId, (nodeName: String, neighbors: Option[Array[(Long, Double)]])) =>
-        (nodeId, NodeAttr(neighbors = neighbors.getOrElse(Array.empty[(Long, Double)]), nodeName = nodeName))
-    }.repartition(params.numPartition).cache
-    indexedEdges = nodeNeighbors.flatMap { case (srcId, linkedNodes) =>
-      linkedNodes.map { case (dstId, weight) =>
-        Edge(srcId, dstId, EdgeAttr())
-      }
-    }.repartition(params.numPartition).cache
-    graph = Graph(indexedNodes, indexedEdges)
+      dstArray.map{ case (dstNode, weight) => (srcNode, dstNode, weight) }
+    }.cache()
+    edges.first()
     this
   }
 
-  def indexingTriplets(rawTriplets: RDD[(String, String, Double)]): RDD[(Long, Long, Double)] = {
-    this.node2id = createNode2Id(rawTriplets)
-
-    rawTriplets.map { case (src, dst, weight) =>
-      (src, (dst, weight))
-    }.join(node2id).map { case (src, (edge: (String, Double), srcIndex: Long)) =>
-      try {
-        val (dst: String, weight: Double) = edge
-        (dst, (srcIndex, weight))
-      } catch {
-        case e: Exception => null
-      }
-    }.filter(_!=null).join(node2id).map { case (dst, (edge: (Long, Double), dstIndex: Long)) =>
-      try {
-        val (srcIndex, weight) = edge
-        (srcIndex, dstIndex, weight)
-      } catch {
-        case e: Exception => null
-      }
-    }.filter(_!=null)
+  def getEdgeProbs(p: Double = 1.0, q: Double = 1.0)(dstNeighbors: Array[(String, Double)],
+                                                     srcNode: String, srcNeighbors: Array[(String, Double)]): Array[Double] = {
+    dstNeighbors.map { case (dstNode, weight) =>
+      var unnormProb = weight / q
+      if (srcNode == dstNode) unnormProb = weight / p
+      else if (srcNeighbors.exists(_._1 == dstNode)) unnormProb = weight
+      unnormProb
+    }
   }
 
-  def initTransitionProb(): this.type = {
-    val P = sc.broadcast(params.p)
-    val Q = sc.broadcast(params.q)
+  def initTransitionProb(spark: SparkSession): this.type = {
+    val p = spark.sparkContext.broadcast(params.p)
+    val q = spark.sparkContext.broadcast(params.q)
+    val nodeNeighbors = edges.map { case (srcNode, dstNode, weight) =>
+      (srcNode, (dstNode, weight))
+    }.groupByKey()
+    nodeProbs = nodeNeighbors.map { case (srcNode, dstIter) =>
+      val dstArray = dstIter.toArray
+      val dstNodes = dstArray.map(_._1)
+      val dstWeight = dstArray.map(_._2)
+      val (accept, alias) = AliasSample.createAliasTable(dstWeight)
+      (srcNode, dstNodes, accept, alias)
+    }.cache()
+    nodeProbs.first()
+    edgeProbs = edges.map { case (srcNode, dstNode, weight) =>
+      (srcNode, dstNode)
+    }.join(nodeNeighbors).map { case (srcNode, (dstNode, srcNeighborsIter)) =>
+      (dstNode, (srcNode, srcNeighborsIter))
+    }.join(nodeNeighbors).map { case (dstNode, ((srcNode, srcNeighborsIter), dstNeighborsIter)) =>
+      val srcNeighbors = srcNeighborsIter.toArray
+      val dstNeighbors = dstNeighborsIter.toArray
+      val probs = getEdgeProbs(p.value, q.value)(dstNeighbors, srcNode, srcNeighbors)
+      val dstNodes = dstNeighbors.map(_._1)
+      val (accept, alias) = AliasSample.createAliasTable(probs)
+      (srcNode+"_"+dstNode, dstNodes, accept, alias)
+    }.cache()
+    edgeProbs.first()
+    edges.unpersist(blocking = false)
+    this
+  }
 
-    graph = graph.mapVertices[NodeAttr] { case (vertexId, nodeAttrs) =>
-        if (nodeAttrs.neighbors.length > 0){
-          val (accept, alias) = AliasSample.createAliasTable(nodeAttrs.neighbors.map(_._2))
+  def randomWalkOnce(): RDD[ArrayBuffer[String]] = {
+    val edgeProbsMap = edgeProbs.map { case (edge, dstNodes, accept, alias) =>
+      (edge, (dstNodes, accept, alias))
+    }
+    var preWalk: RDD[ArrayBuffer[String]] = null
+    var curWalk = nodeProbs.map { case (srcNode, dstNodes, accept, alias) =>
+      val pathBuffer = new ArrayBuffer[String]()
+      val nextNodeIdx = AliasSample.sample(accept, alias)
+      pathBuffer.append(srcNode, dstNodes(nextNodeIdx))
+      pathBuffer
+    }.cache()
+    curWalk.first()
+    for (walkStep <- 0 until params.walkLength) {
+      preWalk = curWalk
+      curWalk = curWalk.map { case pathBuffer =>
+        val preNode = pathBuffer(pathBuffer.length - 2)
+        val curNode = pathBuffer.last
+        (preNode+"_"+curNode, pathBuffer)
+      }.leftOuterJoin(edgeProbsMap).map { case (edge, (pathBuffer, edgeProb)) =>
+        if (!edgeProb.isEmpty) {
+          val (dstNodes, accept, alias) = edgeProb.get
           val nextNodeIdx = AliasSample.sample(accept, alias)
-          nodeAttrs.path = Array(vertexId, nodeAttrs.neighbors(nextNodeIdx)._1)
+          pathBuffer.append(dstNodes(nextNodeIdx))
         }
-        nodeAttrs
-    }.mapTriplets { edgeTriplet: EdgeTriplet[NodeAttr, EdgeAttr] =>
-      if (edgeTriplet.dstAttr.neighbors.length > 0){
-        val edgeProbs = getEdgeProbs(P.value, Q.value)(edgeTriplet)
-        val (accept, alias) = AliasSample.createAliasTable(edgeProbs)
-        edgeTriplet.attr.accept = accept
-        edgeTriplet.attr.alias = alias
-        edgeTriplet.attr.dstNeighbors = edgeTriplet.dstAttr.neighbors.map(_._1)
+        pathBuffer
+      }.cache()
+      curWalk.first()
+      preWalk.unpersist(blocking = false)
+    }
+    curWalk
+  }
+
+  def randomWalkAndSavePathAsTextFile(spark: SparkSession, path: String,
+                                      overwrite: Boolean = true, pathDelimiter: String = " "): Unit = {
+    import spark.implicits._
+    for (iter <- 0 until params.numWalks) {
+      randomWalkPaths = randomWalkOnce()
+      val df = randomWalkPaths.map(_.mkString(pathDelimiter)).toDF()
+      var writer = df.write
+      if (iter == 0 && overwrite) {
+        writer = writer.mode("overwrite")
+      } else {
+        writer = writer.mode("append")
       }
-      edgeTriplet.attr
-    }.cache
-    this
+      writer.text(path)
+      randomWalkPaths.unpersist(blocking = false)
+    }
+  }
+
+  def randomWalkAndSavePathAsHiveTable(spark: SparkSession, tblName: String,
+                                       overwrite: Boolean = true, pathDelimiter: String = " ",
+                                       pathCol: String = "path", partitionCol: String = "", partitionVal: String = ""): Unit = {
+    import spark.implicits._
+    for (iter <- 0 until params.numWalks) {
+      randomWalkPaths = randomWalkOnce()
+      var df = randomWalkPaths.map(_.mkString(pathDelimiter)).toDF(pathCol)
+      if (partitionCol.length > 0){
+        df = df.withColumn(partitionCol, lit(partitionVal))
+      }
+      var writer = df.write
+      if (iter == 0 && overwrite) {
+        writer = writer.mode("overwrite")
+      } else {
+        writer = writer.mode("append")
+      }
+      if (partitionCol.length > 0){
+        writer = writer.partitionBy(partitionCol)
+      }
+      writer.saveAsTable(tblName)
+      randomWalkPaths.unpersist(blocking = false)
+    }
   }
 
   def randomWalk(): this.type = {
-    val edge2attr = graph.triplets.map { edgeTriplet =>
-      (s"${edgeTriplet.srcId}_${edgeTriplet.dstId}", edgeTriplet.attr)
-    }.repartition(params.numPartition).cache
-    edge2attr.first
-
     for (iter <- 0 until params.numWalks) {
-      var prevWalk: RDD[(Long, ArrayBuffer[Long])] = null
-      var randomWalk = graph.vertices.filter(_._2.neighbors.length>0).map { case (nodeId, nodeAttr) =>
-          val pathBuffer = new ArrayBuffer[Long]()
-          pathBuffer.append(nodeAttr.path:_*)
-        (nodeId, pathBuffer)
-      }.cache
-      randomWalk.first
-      graph.unpersist(blocking = false)
-      graph.edges.unpersist(blocking = false)
-
-      for (walkCount <- 0 until params.walkLength) {
-        prevWalk = randomWalk
-        randomWalk = randomWalk.map { case (srcNodeId, pathBuffer) =>
-            val prevNodeId = pathBuffer(pathBuffer.length - 2)
-            val currentNodeId = pathBuffer.last
-          (s"${prevNodeId}_${currentNodeId}", (srcNodeId, pathBuffer))
-        }.join(edge2attr).map { case (edge, ((srcNodeId, pathBufffer), attr)) =>
-            if (attr.dstNeighbors.length>0) {
-              val nextNodeIndex = AliasSample.sample(attr.accept, attr.alias)
-              val nextNodeId = attr.dstNeighbors(nextNodeIndex)
-              pathBufffer.append(nextNodeId)
-            }
-          (srcNodeId, pathBufffer)
-        }.cache
-        randomWalk.first
-        prevWalk.unpersist(blocking = false)
-      }
-
+      val randomWalk = randomWalkOnce()
       if (randomWalkPaths != null) {
         val prevRandomWalkPaths = randomWalkPaths
         randomWalkPaths = randomWalkPaths.union(randomWalk).cache
@@ -156,44 +196,76 @@ object Node2vecModel extends Serializable {
     this
   }
 
-  def createNode2Id(triplets: RDD[(String, String, Double)]) : RDD[(String, Long)] = triplets.flatMap{ case (src, dst, weight) =>
-  Try(Array(src, dst)).getOrElse(Array.empty[String])
-}.distinct().zipWithIndex()
-
-  def getEdgeProbs(p: Double = 1.0, q: Double = 1.0)(edgeTriplet: EdgeTriplet[NodeAttr, EdgeAttr]): Array[Double] = {
-    val srcId = edgeTriplet.srcId
-    val srcNeighbors = edgeTriplet.srcAttr.neighbors
-    val dstNeighbors = edgeTriplet.dstAttr.neighbors
-    dstNeighbors.map { case (dstNodeId, weight) =>
-        var unnormProb = weight / q
-        if (srcId == dstNodeId) unnormProb = weight / p
-        else if (srcNeighbors.exists(_._1 == dstNodeId)) unnormProb = weight
-        unnormProb
+  def saveRandomPathAsTextFile(spark: SparkSession, path: String,
+                               overwrite: Boolean = true, pathDelimiter: String = " "): this.type = {
+    import spark.implicits._
+    val df = randomWalkPaths.map(_.mkString(pathDelimiter)).toDF()
+    val writer = overwrite match {
+      case true => df.write.mode("overwrite")
+      case false => df.write.mode("append")
     }
-  }
-
-  def getId2Node = this.node2id.map{ case (node, index) => (index, node) }
-
-  def getRandomPaths = {
-    randomWalkPaths.map { case (srcNodeId, pathBuffer) =>
-      pathBuffer.toArray }.zipWithIndex.flatMap { case (walkPath, pathId) =>
-      walkPath.zipWithIndex.map { case (nodeId, posId) =>
-        (nodeId, (posId, pathId))
-      }
-    }.join(getId2Node).map { case (nodeId, ((posId, pathId), nodeName)) =>
-      (pathId, Array((nodeName, posId)))
-    }.reduceByKey(_++_).map(_._2.sortBy(_._2).map(_._1))
-  }
-
-  def saveRandomPathAsTextFile(path: String, sep: String = " "): this.type = {
-    getRandomPaths.map(_.mkString(sep)).saveAsTextFile(path)
+    writer.text(path)
     this
   }
 
-  def saveRandomPathAsHiveTable(tblName: String, column: String = "sequence", sep: String = " "): this.type = {
-    val dupSpark = spark
-    import dupSpark.implicits._
-    getRandomPaths.map(_.mkString(sep)).toDF(column).write.mode(SaveMode.Overwrite).saveAsTable(tblName)
+  def saveRandomPathAsHiveTable(spark: SparkSession, tblName: String,
+                                overwrite: Boolean = true, pathDelimiter: String = " ",
+                                pathCol: String = "path", partitionCol: String = "", partitionVal: String = ""): this.type = {
+    import spark.implicits._
+    var df = randomWalkPaths.map(_.mkString(pathDelimiter)).toDF(pathCol)
+    if (partitionCol.length > 0){
+      df = df.withColumn(partitionCol, lit(partitionVal))
+    }
+    var writer = overwrite match {
+      case true => df.write.mode("overwrite")
+      case false => df.write.mode("append")
+    }
+    if (partitionCol.length > 0){
+      writer = writer.partitionBy(partitionCol)
+    }
+    writer.saveAsTable(tblName)
+    this
+  }
+
+  def trainEmbedding(saprk: SparkSession): this.type = {
+    import saprk.implicits._
+    val df = randomWalkPaths.map(_.toSeq).toDF()
+    val word2vecModel = new Word2Vec().setMinCount(params.minCount).setWindowSize(params.windowSize)
+        .setVectorSize(params.embedDim).setMaxIter(params.maxIter).setStepSize(params.stepSize).fit(df)
+    embeddings = word2vecModel.getVectors
+    this
+  }
+
+  def saveEmbeddingAsTextFile(spark: SparkSession, path: String,
+                              overwrite: Boolean = true,
+                              fieldDelimiter: String = "\t", embedDelimiter: String = " "): this.type = {
+    import spark.implicits._
+    val df = embeddings.rdd.map(row => row.getString(0)+fieldDelimiter+row.getAs[DenseVector](1).toArray.mkString(embedDelimiter)).toDF()
+    val writer = overwrite match {
+      case true => df.write.mode("overwrite")
+      case false => df.write.mode("append")
+    }
+    writer.text(path)
+    this
+  }
+
+  def saveEmbeddingAsHiveTable(spark: SparkSession, tblName: String,
+                               overwrite: Boolean = true, embedDelimiter: String = " ",
+                               nodeCol: String = "node", embedCol: String = "embedding",
+                               partitionCol: String = "", partitionVal: String = ""): this.type = {
+    import spark.implicits._
+    var df = embeddings.rdd.map(row => (row.getString(0), row.getAs[DenseVector](1).toArray.mkString(embedDelimiter))).toDF(nodeCol, embedCol)
+    if (partitionCol.length > 0){
+      df = df.withColumn(partitionCol, lit(partitionVal))
+    }
+    var writer = overwrite match {
+      case true => df.write.mode("overwrite")
+      case false => df.write.mode("append")
+    }
+    if (partitionCol.length > 0){
+      writer = writer.partitionBy(partitionCol)
+    }
+    writer.saveAsTable(tblName)
     this
   }
 }
