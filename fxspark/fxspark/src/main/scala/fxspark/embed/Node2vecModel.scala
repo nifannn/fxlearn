@@ -193,6 +193,8 @@ object Node2vecModel extends Serializable {
         randomWalkPaths = randomWalk
       }
     }
+    nodeProbs.unpersist(blocking = false)
+    edgeProbs.unpersist(blocking = false)
     this
   }
 
@@ -227,11 +229,11 @@ object Node2vecModel extends Serializable {
     this
   }
 
-  def trainEmbedding(saprk: SparkSession): this.type = {
+  def trainEmbedding(saprk: SparkSession, numPartition: Int = 64): this.type = {
     import saprk.implicits._
-    val df = randomWalkPaths.map(_.toSeq).toDF()
-    val word2vecModel = new Word2Vec().setMinCount(params.minCount).setWindowSize(params.windowSize)
-        .setVectorSize(params.embedDim).setMaxIter(params.maxIter).setStepSize(params.stepSize).fit(df)
+    val df = randomWalkPaths.map(_.toSeq).toDF("path")
+    val word2vecModel = new Word2Vec().setMinCount(params.minCount).setWindowSize(params.windowSize).setNumPartitions(numPartition)
+        .setVectorSize(params.embedDim).setMaxIter(params.maxIter).setStepSize(params.stepSize).setInputCol("path").fit(df)
     embeddings = word2vecModel.getVectors
     this
   }

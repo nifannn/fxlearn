@@ -129,7 +129,7 @@ object Swing {
                         config.itemICol, config.itemJCol, config.scoreCol, config.overwrite,
                         config.partitionCol, config.partitionVal)
         case "text" => SwingModel.buildGraph(df, config.maxUser).computeItemSimilarity().saveItemSimilarityAsTextFile(spark, config.out,
-          config.overwrite, config.fieldDelimiter, config.collectionDelimiter)
+          config.overwrite, config.fieldDelimiter)
       }
       case "topn" => config.saveMode match {
         case "hive" => {
@@ -151,7 +151,7 @@ object Swing {
         case "text" => {
           if (config.saveScore.length>0) {
             SwingModel.buildGraph(df, config.maxUser).computeItemSimilarity()
-              .saveItemSimilarityAsTextFile(spark, config.saveScore, config.overwrite, config.fieldDelimiter, config.collectionDelimiter)
+              .saveItemSimilarityAsTextFile(spark, config.saveScore, config.overwrite, config.fieldDelimiter)
               .computeTopn(config.topn)
               .saveTopnAsTextFile(spark, config.out, config.overwrite, config.fieldDelimiter, config.collectionDelimiter)
           }

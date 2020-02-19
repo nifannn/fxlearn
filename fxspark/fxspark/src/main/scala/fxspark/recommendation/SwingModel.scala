@@ -118,8 +118,7 @@ object SwingModel {
   }
 
   def saveItemSimilarityAsTextFile(spark: SparkSession, path: String,
-                                   overwrite: Boolean = false,
-                                   fieldDelimiter: String = "\t", collectionDelimiter: String = ","): this.type = {
+                                   overwrite: Boolean = false, fieldDelimiter: String = "\t"): this.type = {
     import spark.implicits._
     val df = itemSimilarity.map(x => String.join(fieldDelimiter, x._1.toString, x._2.toString, x._3.toString)).toDF()
     var writer = df.write

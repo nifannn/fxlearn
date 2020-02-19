@@ -34,7 +34,8 @@ object Node2vec {
                    maxIter: Int = 3,
                    minCount: Int = 5,
                    windowSize: Int = 5,
-                   stepSize: Double = 0.025)
+                   stepSize: Double = 0.025,
+                   numPartition: Int = 64)
 
   val builder = OParser.builder[Config]
   val parser = {
@@ -127,7 +128,10 @@ object Node2vec {
             .text("window size"),
           opt[Double]("step-size")
             .action((x, c) => c.copy(stepSize = x))
-            .text("step size used for each iteration of optimization")
+            .text("step size used for each iteration of optimization"),
+          opt[Int]("num-partition")
+            .action((x, c) => c.copy(numPartition = x))
+            .text("number of partitions when training embedding")
         )
     )
   }
@@ -179,13 +183,13 @@ object Node2vec {
               config.directed, config.weighted, config.embedDim, config.maxIter, config.minCount, config.windowSize,
               config.stepSize).buildGraph(spark, df).initTransitionProb(spark).randomWalk().saveRandomPathAsHiveTable(
               spark, config.savePath, config.overwrite, config.pathDelimiter, config.pathCol,
-              config.partitionCol, config.partitionVal).trainEmbedding(spark).saveEmbeddingAsHiveTable(spark, config.out,
+              config.partitionCol, config.partitionVal).trainEmbedding(spark, config.numPartition).saveEmbeddingAsHiveTable(spark, config.out,
               config.overwrite, config.embedDelimiter, config.nodeCol, config.embedCol, config.partitionCol, config.partitionVal)
           } else {
             Node2vecModel.setParams(config.degree, config.p, config.q, config.numWalks, config.walkLength,
               config.directed, config.weighted, config.embedDim, config.maxIter, config.minCount, config.windowSize,
               config.stepSize).buildGraph(spark, df).initTransitionProb(spark).randomWalk().trainEmbedding(
-              spark).saveEmbeddingAsHiveTable(spark, config.out, config.overwrite, config.embedDelimiter,
+              spark, config.numPartition).saveEmbeddingAsHiveTable(spark, config.out, config.overwrite, config.embedDelimiter,
               config.nodeCol, config.embedCol, config.partitionCol, config.partitionVal)
           }
         }
@@ -194,13 +198,13 @@ object Node2vec {
             Node2vecModel.setParams(config.degree, config.p, config.q, config.numWalks, config.walkLength,
               config.directed, config.weighted, config.embedDim, config.maxIter, config.minCount, config.windowSize,
               config.stepSize).buildGraph(spark, df).initTransitionProb(spark).randomWalk().saveRandomPathAsTextFile(
-              spark, config.savePath, config.overwrite, config.pathDelimiter).trainEmbedding(spark).saveEmbeddingAsTextFile(spark, config.out,
+              spark, config.savePath, config.overwrite, config.pathDelimiter).trainEmbedding(spark, config.numPartition).saveEmbeddingAsTextFile(spark, config.out,
               config.overwrite, config.fieldDelimiter, config.embedDelimiter)
           } else {
             Node2vecModel.setParams(config.degree, config.p, config.q, config.numWalks, config.walkLength,
               config.directed, config.weighted, config.embedDim, config.maxIter, config.minCount, config.windowSize,
               config.stepSize).buildGraph(spark, df).initTransitionProb(spark).randomWalk().trainEmbedding(
-              spark).saveEmbeddingAsTextFile(spark, config.out, config.overwrite, config.fieldDelimiter, config.embedDelimiter)
+              spark, config.numPartition).saveEmbeddingAsTextFile(spark, config.out, config.overwrite, config.fieldDelimiter, config.embedDelimiter)
           }
         }
       }
